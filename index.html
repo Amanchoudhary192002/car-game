@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Car Game</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #111;
+      overflow: hidden;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    #gameArea {
+      width: 400px;
+      height: 600px;
+      background: #333;
+      margin: 30px auto;
+      position: relative;
+      overflow: hidden;
+      touch-action: none;
+    }
+    #playerCar {
+      width: 50px;
+      height: 100px;
+      background: red;
+      position: absolute;
+      bottom: 10px;
+      left: 175px;
+      border-radius: 5px;
+    }
+    .enemyCar {
+      width: 50px;
+      height: 100px;
+      background: yellow;
+      position: absolute;
+      top: -100px;
+      border-radius: 5px;
+    }
+    .controls {
+      margin-top: 20px;
+    }
+    .controls button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 0 10px;
+      cursor: pointer;
+    }
+    #scoreBoard {
+      font-size: 20px;
+      margin-top: 10px;
+    }
+    #startScreen {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      color: white;
+      z-index: 10;
+    }
+    #startScreen input {
+      padding: 10px;
+      margin: 10px;
+      font-size: 16px;
+    }
+    #startScreen button {
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div id="gameArea">
+    <div id="startScreen">
+      <h2>Enter Player Name</h2>
+      <input type="text" id="playerNameInput" placeholder="Your name" />
+      <button onclick="startGame()">Start Game</button>
+    </div>
+    <div id="playerCar"></div>
+  </div>
+  <div id="scoreBoard">Score: 0</div>
+  <div class="controls">
+    <button onclick="moveLeft()">Left</button>
+    <button onclick="moveRight()">Right</button>
+  </div>
+
+  <script>
+    const gameArea = document.getElementById("gameArea");
+    const playerCar = document.getElementById("playerCar");
+    const scoreBoard = document.getElementById("scoreBoard");
+    const startScreen = document.getElementById("startScreen");
+    const playerNameInput = document.getElementById("playerNameInput");
+
+    let playerX = 175;
+    let score = 0;
+    let gameInterval;
+    let enemyInterval;
+
+    function updatePlayerPosition() {
+      playerCar.style.left = playerX + "px";
+    }
+
+    function moveLeft() {
+      if (playerX > 0) {
+        playerX -= 25;
+        updatePlayerPosition();
+      }
+    }
+
+    function moveRight() {
+      if (playerX < 350) {
+        playerX += 25;
+        updatePlayerPosition();
+      }
+    }
+
+    function movePlayer(e) {
+      if (e.key === "ArrowLeft") {
+        moveLeft();
+      }
+      if (e.key === "ArrowRight") {
+        moveRight();
+      }
+    }
+
+    function createEnemyCar() {
+      const enemy = document.createElement("div");
+      enemy.classList.add("enemyCar");
+      enemy.style.left = Math.floor(Math.random() * 350) + "px";
+      gameArea.appendChild(enemy);
+
+      let enemyY = -100;
+      const interval = setInterval(() => {
+        if (enemyY > 600) {
+          clearInterval(interval);
+          gameArea.removeChild(enemy);
+          score++;
+          scoreBoard.textContent = `Score: ${score}`;
+        } else {
+          enemyY += 5;
+          enemy.style.top = enemyY + "px";
+
+          // Collision detection
+          if (
+            enemyY + 100 > 500 &&
+            enemyY < 600 &&
+            parseInt(enemy.style.left) < playerX + 50 &&
+            parseInt(enemy.style.left) + 50 > playerX
+          ) {
+            clearInterval(interval);
+            alert("Game Over! Score: " + score);
+            window.location.reload();
+          }
+        }
+      }, 20);
+    }
+
+    function startGame() {
+      const playerName = playerNameInput.value.trim();
+      if (playerName === "") {
+        alert("Please enter your name to start.");
+        return;
+      }
+      startScreen.style.display = "none";
+      document.addEventListener("keydown", movePlayer);
+      enemyInterval = setInterval(createEnemyCar, 1500);
+    }
+
+    // Touch Controls
+    let touchStartX = null;
+    gameArea.addEventListener("touchstart", e => {
+      touchStartX = e.changedTouches[0].clientX;
+    });
+
+    gameArea.addEventListener("touchend", e => {
+      if (touchStartX === null) return;
+      let touchEndX = e.changedTouches[0].clientX;
+      let diffX = touchEndX - touchStartX;
+
+      if (Math.abs(diffX) > 30) {
+        if (diffX < 0) moveLeft();
+        else moveRight();
+      }
+      touchStartX = null;
+    });
+  </script>
+</body>
+</html>
