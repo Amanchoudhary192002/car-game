@@ -42,6 +42,12 @@
       position: absolute;
       top: -100px;
       border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: black;
+      font-size: 14px;
     }
     .controls {
       margin-top: 20px;
@@ -105,6 +111,7 @@
     let score = 0;
     let gameInterval;
     let enemyInterval;
+    const enemyNames = ["Aman", "Vishal", "Aditya"];
 
     function updatePlayerPosition() {
       playerCar.style.left = playerX + "px";
@@ -137,6 +144,10 @@
       const enemy = document.createElement("div");
       enemy.classList.add("enemyCar");
       enemy.style.left = Math.floor(Math.random() * 350) + "px";
+
+      const name = enemyNames[Math.floor(Math.random() * enemyNames.length)];
+      enemy.textContent = name;
+
       gameArea.appendChild(enemy);
 
       let enemyY = -100;
@@ -150,7 +161,6 @@
           enemyY += 5;
           enemy.style.top = enemyY + "px";
 
-          // Collision detection
           if (
             enemyY + 100 > 500 &&
             enemyY < 600 &&
@@ -176,7 +186,6 @@
       enemyInterval = setInterval(createEnemyCar, 1500);
     }
 
-    // Touch Controls
     let touchStartX = null;
     gameArea.addEventListener("touchstart", e => {
       touchStartX = e.changedTouches[0].clientX;
